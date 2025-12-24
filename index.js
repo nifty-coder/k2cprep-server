@@ -87,7 +87,8 @@ app.post('/api/contact', async (req, res) => {
         return res.status(500).json({ status: "error", message: "Failed to create email transporter" });
     }
 
-    const mailOptions = {
+    // Email to K2C (notification)
+    const notificationMailOptions = {
         from: process.env.EMAIL_USER,
         to: process.env.RECEIVER_EMAIL || 'info@k2cprep.com',
         subject: `New Contact Form Submission from ${name} - ${program}`,
@@ -112,8 +113,30 @@ app.post('/api/contact', async (req, res) => {
         replyTo: email
     };
 
+    // Email to user (confirmation)
+    const confirmationMailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Thank you for contacting K2C Prep!',
+        text: `Hi ${name},
+        
+    Thank you for reaching out to K2C Prep! We have received your inquiry about ${program}.
+        
+    We will review your message and get back to you as soon as possible.
+        
+    Best regards,
+    K2C Prep Team
+    `,
+        replyTo: process.env.RECEIVER_EMAIL || 'info@k2cprep.com'
+    };
+
     try {
-        await transporter.sendMail(mailOptions);
+        // Send notification email to K2C
+        await transporter.sendMail(notificationMailOptions);
+
+        // Send confirmation email to user
+        await transporter.sendMail(confirmationMailOptions);
+
         res.status(200).json({ status: "success", message: "Email sent successfully" });
     } catch (error) {
         console.error("Error sending email:", error);
