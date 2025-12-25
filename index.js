@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
+const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -135,6 +136,32 @@ app.post('/api/contact', async (req, res) => {
     } catch (error) {
         console.error("Error sending email:", error);
         res.status(500).json({ status: "error", message: "Failed to send email" });
+    }
+});
+
+app.post('/api/validate-email', async (req, res) => {
+    const { email } = req.body;
+    const apiKey = process.env.ABSTRACT_API_KEY;
+
+    if (!apiKey) {
+        console.error("ABSTRACT_API_KEY is missing in server environment");
+        return res.json({ valid: true });
+    }
+
+    try {
+        const response = await axios.get(`https://emailreputation.abstractapi.com/v1/?api_key=${apiKey}&email=${email}`);
+        const data = response.data;
+
+        if (data.email_deliverability?.status === "undeliverable") {
+            return res.json({ valid: false, message: "This email domain does not exist or cannot receive emails." });
+        } else if (data.email_quality?.is_disposable === true) {
+            return res.json({ valid: false, message: "Please use a permanent email address (no disposable emails)." });
+        } else {
+            return res.json({ valid: true });
+        }
+    } catch (error) {
+        console.error("Email validation API error:", error);
+        return res.json({ valid: true });
     }
 });
 
