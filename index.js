@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
-const { google } = require('googleapis');
 const cors = require('cors');
 
 const app = express();
@@ -38,40 +37,23 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// OAuth2 Client Setup
-const OAuth2 = google.auth.OAuth2;
-
 const createTransporter = async () => {
     try {
-        const oauth2Client = new OAuth2(
-            process.env.CLIENT_ID,
-            process.env.CLIENT_SECRET,
-            process.env.REDIRECT_URI || "https://developers.google.com/oauthplayground"
-        );
-
-        oauth2Client.setCredentials({
-            refresh_token: process.env.REFRESH_TOKEN
-        });
-
-        const accessToken = await new Promise((resolve, reject) => {
-            oauth2Client.getAccessToken((err, token) => {
-                if (err) {
-                    reject("Failed to create access token :(");
-                }
-                resolve(token);
-            });
-        });
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            console.error("Missing SMTP_USER or SMTP_PASS in environment variables");
+            return null;
+        }
 
         const transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "mail.smtp2go.com",
+            port: 2525, // Standard SMTP port, often works better on cloud platforms than 465
+            secure: false, // true for 465, false for other ports
             auth: {
-                type: "OAuth2",
-                user: process.env.EMAIL_USER,
-                accessToken,
-                clientId: process.env.CLIENT_ID,
-                clientSecret: process.env.CLIENT_SECRET,
-                refreshToken: process.env.REFRESH_TOKEN
-            }
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000
         });
 
         return transporter;
