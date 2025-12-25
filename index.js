@@ -10,19 +10,31 @@ const PORT = process.env.PORT || 5001;
 // Middleware
 // Middleware
 // Middleware
-const allowedOrigins = ['https://k2cprep.com', 'https://www.k2cprep.com', 'http://localhost:5173'];
+const allowedOrigins = [
+    'https://k2cprep.com',
+    'https://www.k2cprep.com',
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
+
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
+
+        const isAllowed = allowedOrigins.indexOf(origin) !== -1 ||
+            origin.endsWith('.onrender.com');
+
+        if (isAllowed) {
+            return callback(null, true);
+        } else {
+            console.error(`CORS blocked for origin: ${origin}`);
+            return callback(new Error('Not allowed by CORS'), false);
         }
-        return callback(null, true);
     },
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 app.use(express.json());
 
