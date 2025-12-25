@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 5001;
 const allowedOrigins = [
     'https://k2cprep.com',
     'https://www.k2cprep.com',
+    "https://k2cprep-website.web.app",
     'http://localhost:5173',
     'http://localhost:3000'
 ];
