@@ -150,7 +150,9 @@ app.post('/api/validate-email', async (req, res) => {
     }
 
     try {
-        const response = await axios.get(`https://emailreputation.abstractapi.com/v1/?api_key=${apiKey}&email=${email}`);
+        const response = await axios.get(`https://emailreputation.abstractapi.com/v1/?api_key=${apiKey}&email=${email}`, {
+            timeout: 10000 // 10 second timeout
+        });
         const data = response.data;
 
         if (data.email_deliverability?.status === "undeliverable") {
@@ -161,7 +163,8 @@ app.post('/api/validate-email', async (req, res) => {
             return res.json({ valid: true });
         }
     } catch (error) {
-        console.error("Email validation API error:", error);
+        console.error("Email validation API error (timeout or failure):", error.message);
+        // If timeout or any other error occurs, assume email is valid to avoid blocking the user
         return res.json({ valid: true });
     }
 });
