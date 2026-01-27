@@ -8,8 +8,6 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Middleware
-// Middleware
-// Middleware
 const allowedOrigins = [
     'https://k2cprep.com',
     'https://www.k2cprep.com',
