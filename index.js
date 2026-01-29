@@ -12,6 +12,8 @@ const allowedOrigins = [
     'https://k2cprep.com',
     'https://www.k2cprep.com',
     "https://k2cprep-website.web.app",
+    "https://ktocprep.com",
+    "https://www.ktocprep.com",
     'http://localhost:5173',
     'http://localhost:3000'
 ];
